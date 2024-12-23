@@ -1,0 +1,21 @@
+function [trainds, unlabledds, valds] = datastoreCreator()
+    trainSmall = readtable('train_small.csv ');
+    trainUnlabled = readtable('train_unlabeled.csv');
+    val = readtable('val_info.csv');
+
+    labledTrainFiles = trainSmall{:,1};
+    labledTrainLables = trainSmall{:,2};
+
+    unlabledTrainFiles = trainUnlabled{:,1};
+
+    valFiles = val{:,1};
+    valLables = val{:,2};
+
+    trainSetFile = "..\train_set";
+    valSetFileNoDeg = "..\val_set";
+    valSetFileDeg = "..\val_set_degraded";
+
+    labledTrainSetPath = fullfile(trainSetFile, labledTrainFiles);
+    unlabledTrainSetPath = fullfile(trainSetFile, unlabledTrainFiles);
+    valSetNoDegPath = fullfile(valSetNoDeg)
+end

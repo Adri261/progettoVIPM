@@ -1,0 +1,9 @@
+function conma = BOWClassification(featStep,imsize)
+for ii= featStep:featStep:imsize-featStep
+    for jj=featStep:featStep:imsize-featStep
+        
+    end
+end
+
+
+end
