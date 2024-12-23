@@ -12,7 +12,7 @@
 	3. Applicare il classificatore migliore ottenuto ed eseguire classificazione, ri-addestrare il classificatore con le label generate(eventualmente considerare solo le prime k-più confident di ogni classe/le immagini con confidence più alta)
 	4. Trovare l'easter egg
 	5. Similarity Search tramite clustering: estrarre feature da TUTTE le immagini(labeled e unlabeled) e mettere assieme immagini più simili rispetto a feature, accorpandole poi insieme e dandogli una label.
-	6.  CBIR con feedback implicito (dico che sono di classe x le prime k immagini di risulatato ->poi ricerco immagini simili anche a loro).
+ 	6. CBIR con feedback implicito (dico che sono di classe x le prime k immagini di risulatato ->poi ricerco immagini simili anche a loro).
 	7. Self-Supervised learning
 6. Dataset Degraded:
 	1. Analizzare come è stato degradato, eventualmente creare un algoritmo di elaborazione delle immagini "ad hoc" che sia in grado di pulirlo, così da evitare che il classificatore si occupi della pulizia
