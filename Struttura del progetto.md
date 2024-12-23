@@ -5,7 +5,7 @@
 	2. Transfer learning/Feature extraction
 
 2. Data *augmentation* su le immagini di base, quelle labeled. Usare la libreria fornita nel corso per idee sull'augmentation
-
+ 
 3. Provare se vogliamo a fare la *segmentazione* per eliminare tutto il background dalle immagini
 	1. Provare segmentazione tramite superpixels
 
