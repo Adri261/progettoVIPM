@@ -1,7 +1,12 @@
 env
+runs
 train_set.zip
 train_set
 val_set.zip
 val_set
 val_set_degraded.zip
 val_set_degraded
+Transfer_Learning/models
+Transfer_Learning/models_bgr
+Transfer_Learning/neural_features
+Transfer_Learning/neural_features_bgr
