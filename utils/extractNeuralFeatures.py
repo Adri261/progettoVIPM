@@ -8,7 +8,7 @@ import csv
 import numpy as np
 from tqdm import tqdm
 
-def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, transfer_network, data_file, cuda=False):    
+def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, transfer_network, data_file, cuda=False, transform=None):    
     if(os.path.exists(data_file)):
         numpy_feat = np.load(data_file).astype("float32")
         if(cuda):            
@@ -23,7 +23,7 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
                 y.append(row[1])
         y = np.array(y).astype("int")
     else:
-        dataset_holder = ImageDataset(dataset=dataset, network_input_size=input_size, cuda=cuda)
+        dataset_holder = ImageDataset(dataset=dataset, network_input_size=input_size, cuda=cuda, transform=transform)
         loader = DataLoader(dataset=dataset_holder, shuffle=False, batch_size=1)
         if(cuda):    
             net_features = torch.zeros(len(dataset_holder), in_features)
@@ -70,14 +70,14 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
     return net_features, numpy_feat, y
     
 
-def extract_features(train_set, test_set, network, layers_to_remove, cuda):
+def extract_features(target_dir, train_set, test_set, network, layers_to_remove, cuda, transform):
     
     dataset_name = train_set.value[1]
     if train_set.value[0] == "train_unlabeled.csv":
         dataset_name = "train_unlabaled"
 
-    train_data_file = "./Transfer_Learning/neural_features/Train_{}_minus{}_{}.npy".format(network.value[2], layers_to_remove, dataset_name)
-    test_data_file = "./Transfer_Learning/neural_features/Test_{}_minus{}_{}.npy".format(network.value[2], layers_to_remove, test_set.value[1])
+    train_data_file = "./{}/neural_features/Train_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, dataset_name)
+    test_data_file = "./{}/neural_features/Test_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, test_set.value[1])
 
     errore = "There are less than {} layer in the given network's classifier".format(layers_to_remove)
     net_input_size = network.value[0]
@@ -100,12 +100,12 @@ def extract_features(train_set, test_set, network, layers_to_remove, cuda):
     net_features_train, numpy_feat_train, y_train = extract_features_of_dataset(dataset=train_set, dataset_type="Train",
                                                                                 input_size=net_input_size,
                                                                                 in_features = in_features,
-                                                                                transfer_network=net,data_file=train_data_file, cuda=cuda)
+                                                                                transfer_network=net,data_file=train_data_file, cuda=cuda, transform=transform)
     
     net_features_test, numpy_feat_test, y_test = extract_features_of_dataset(dataset=test_set, dataset_type="Test",
                                                                                 input_size=net_input_size,
                                                                                 in_features = in_features,
-                                                                                transfer_network=net,data_file=test_data_file, cuda=cuda)
+                                                                                transfer_network=net,data_file=test_data_file, cuda=cuda, transform=transform)
     
     return net_features_train, numpy_feat_train, y_train, net_features_test, numpy_feat_test, y_test, fine_tune_layers
     
