@@ -15,6 +15,7 @@
 	3. Similarity Search tramite clustering: estrarre feature da TUTTE le immagini(labeled e unlabeled) e mettere assieme immagini più simili rispetto a feature, accorpandole poi insieme e dandogli una label.
  	4. *Self-Supervised learning*
 
+4-post. Data *augmentation* su le immagini di base + quelle raccattate dall'unlabeled. 
 
 5. Dataset Degraded:
 	1. Analizzare come è stato degradato, eventualmente creare un algoritmo di elaborazione delle immagini "ad hoc" che sia in grado di *pulirlo*, così da evitare che il classificatore si occupi della pulizia
@@ -23,5 +24,5 @@
 ---
 
 ### Idee
-- [ ] Per Degraded: dato che il dataset non degraded e degraded contengono le stesse identiche immagini, cambia solo il fatto che siano degraded, allora si potrebbe pensare di allenare un'autoencoder che prende come inputi l'immagine degraded e ha come obiettivo di ricostruire l'immagine non-degraded (ce lo lasciano fare?). Poi se questo metodo funziona si potrebbe mettere l'esecuzione dell'autoencoder come step precedente alla classificazione nella pipeline finale
+- Per Degraded: stimare parametri di restoration su split di 11994 pic rovinate. Applico restoration a seconda della qualità che stimo alle immagini sottomesse.
 
