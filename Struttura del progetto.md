@@ -24,5 +24,7 @@
 ---
 
 ### Idee
-- Per Degraded: stimare parametri di restoration su split di 11994 pic rovinate. Applico restoration a seconda della qualità che stimo alle immagini sottomesse.
+- [ ] Per Degraded: dato che il dataset non degraded e degraded contengono le stesse identiche immagini, cambia solo il fatto che siano degraded, allora si potrebbe pensare di allenare un'autoencoder che prende come inputi l'immagine degraded e ha come obiettivo di ricostruire l'immagine non-degraded. Poi se questo metodo funziona si potrebbe mettere l'esecuzione dell'autoencoder come step precedente alla classificazione nella pipeline finale
+- [ ] Per lettura immagine: aggiungiamo un random crop invece di un resize delle immagini troppo grandi?
+
 
