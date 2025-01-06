@@ -1,6 +1,7 @@
 env
 runs
 train_set.zip
+separated_training_set
 train_set
 separated_training_set
 val_set.zip
