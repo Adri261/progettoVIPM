@@ -10,8 +10,10 @@ import matplotlib.pyplot as plt
 class datasets(Enum):
     TRAINING_LABELED = ["train_small.csv", "train_set"]
     TRAINING_UNLABELED = ["train_unlabeled.csv", "train_set"]
+    TRAINING_MIXED = ["train_mixed.csv", "train_set"]
     TEST = ["val_info.csv", "val_set"]
     TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]
+    
 
 
 #https://pytorch.org/hub/pytorch_vision_alexnet/
