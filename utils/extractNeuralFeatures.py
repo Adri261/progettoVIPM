@@ -109,3 +109,29 @@ def extract_features(train_set, test_set, network, layers_to_remove, cuda):
     
     return net_features_train, numpy_feat_train, y_train, net_features_test, numpy_feat_test, y_test, fine_tune_layers
     
+    
+    
+def extrac_features_from_unlabled_dataset(dataset, network, layers_to_remove):
+    
+    net_input_size = network.value[0]
+    net = deepcopy(network.value[1])
+    
+    last_layer_to_remove_pos = len(net.classifier)
+    in_features = 0
+    
+    for layer in net.classifier[::-1]:
+        if layers_to_remove != 0:
+            if isinstance(layer, nn.Linear):
+                layers_to_remove -= 1
+                in_features = layer.in_features
+            last_layer_to_remove_pos -= 1
+    
+    fine_tune_layers = nn.Sequential(*[net.classifier[i] for i in range(last_layer_to_remove_pos, len(net.classifier))])
+    net.classifier = nn.Sequential(*[net.classifier[i] for i in range(last_layer_to_remove_pos)])
+    
+    unlabled_data_file = "./Transfer_Learning/neural_features/Unlabled_{}_minus{}_{}.npy".format(network.value[2], layers_to_remove, dataset.value[1])
+    net_features, numpy_feat, y = extract_features_of_dataset(dataset=dataset, dataset_type="unlabled",
+                                                                                input_size=net_input_size, in_features=in_features,
+                                                                                transfer_network=net,data_file=unlabled_data_file)    
+    
+    return net_features, numpy_feat, fine_tune_layers
