@@ -20,6 +20,7 @@ class networks(Enum):
     ALEXNET = [227, models.alexnet(pretrained=True), "AlexNet"]
     RESNET50 = [224, models.resnet50(pretrained=True), "ResNet50"]
     GOOGLENET = [224, models.googlenet(pretrained=True), "GoogLeNet"]
+    MOBILENET = [224, models.mobilenet_v3_small(pretrained=True), "MobileNetV3_small"]
 
 class ImageDataset(Dataset):
     def visualize_image(image_tensor):

@@ -70,14 +70,16 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
     return net_features, numpy_feat, y
     
 
-def extract_features(target_dir, train_set, test_set, network, layers_to_remove, cuda, transform):
-    
+def extract_features(train_set, test_set, network, layers_to_remove, cuda, augmented=False, transform=None):
+    target_dir = "Storage/neural_features"
+    if augmented:
+        target_dir = "Storage/augmented_neural_features"
     dataset_name = train_set.value[1]
     if train_set.value[0] == "train_unlabeled.csv":
         dataset_name = "train_unlabaled"
 
-    train_data_file = "./{}/neural_features/Train_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, dataset_name)
-    test_data_file = "./{}/neural_features/Test_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, test_set.value[1])
+    train_data_file = "./{}/Train_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, dataset_name)
+    test_data_file = "./{}/Test_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, test_set.value[1])
 
     errore = "There are less than {} layer in the given network's classifier".format(layers_to_remove)
     net_input_size = network.value[0]

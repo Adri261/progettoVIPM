@@ -1,5 +1,7 @@
 env
+utils/__pycache__
 runs
+Storage
 train_set.zip
 separated_training_set
 train_set
