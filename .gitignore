@@ -1,4 +1,5 @@
 env
+utils/__pycache__
 runs
 train_set.zip
 separated_training_set
