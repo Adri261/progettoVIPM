@@ -18,6 +18,7 @@ def fine_tune_network_layers(cuda, net_layers, x_train, y_train, n_epochs, batch
     print("-------------------------------------------------------")
     model = deepcopy(net_layers)
     if (cuda):
+        model.cuda()
         y_train = torch.tensor(y_train).type(torch.LongTensor).cuda()
     else:
         y_train = torch.tensor(y_train).type(torch.LongTensor)
@@ -29,7 +30,7 @@ def fine_tune_network_layers(cuda, net_layers, x_train, y_train, n_epochs, batch
     training_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
     validation_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
-    model,losses = train_model(training_loader, validation_loader, n_epochs, loss_function, optimizer)
+    model,losses = train_model(training_loader, validation_loader, n_epochs, model, loss_function, optimizer)
 
     return model, losses
 
@@ -56,7 +57,7 @@ def train_model(training_loader, validation_loader, n_epochs, model, loss_functi
         i = 1
         # Disable gradient computation and reduce memory consumption.
         with torch.no_grad():
-            for vdata in enumerate(validation_loader):
+            for vdata in validation_loader:
                 vinputs, vlabels = vdata
                 voutputs = model(vinputs)
                 vloss = loss_function(voutputs, vlabels)
@@ -74,11 +75,10 @@ def train_one_epoch(training_loader, model, loss_function, optimizer):
     model.train()
     n_batch = 1
     avg_batch_loss=0
-    for data in enumerate(training_loader):
+    for data in training_loader:
         
         # Every data instance is an input + label pair
         inputs, labels = data
-        print(labels)
 
         # Zero the parameter gradients
         optimizer.zero_grad()
@@ -87,7 +87,6 @@ def train_one_epoch(training_loader, model, loss_function, optimizer):
         outputs = model(inputs)
         loss = loss_function(outputs, labels)
         avg_batch_loss += loss.item()
-        loss.backward()
         
         # Backward pass and optimization
         loss.backward()
@@ -105,19 +104,23 @@ def eval_model_on_test_set(model, model_name, target_dir, x_test, y_test, cuda):
         x_test = torch.from_numpy(x_test).float()
     
     test_loader = DataLoader(torch.utils.data.TensorDataset(x_test, y_test), batch_size=1, shuffle=False)
+    return eval_model_on_test_loader(model, model_name, target_dir, test_loader, cuda)
 
+def eval_model_on_test_loader(model, model_name, target_dir, test_loader, cuda):
     model.eval()
 
     predictions = np.zeros(len(test_loader))
     # Disable gradient computation and reduce memory consumption.
+    y_test = []
     with torch.no_grad():
         i = 0
         for test_data in tqdm(test_loader):
             test_features, test_labels = test_data
+            y_test.append(test_labels)
             predictions[i] = np.argmax(np.array(model(test_features).cpu()))
             i+=1
     
-    y_test = np.array(y_test.cpu())
+    y_test = np.array(y_test)
     accuracy = accuracy_score(y_test, predictions)
     print("Accuracy: {}".format(accuracy))
     cm = confusion_matrix(y_test, predictions)

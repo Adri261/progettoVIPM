@@ -43,8 +43,9 @@ class ImageDataset(Dataset):
         print(image_np)
         plt.axis('off') # Hide the axis plt.show()
 
-    def __init__(self, dataset, network_input_size, cuda, transform=None):
+    def __init__(self, dataset, network_input_size, cuda, transform=None, y_cuda = False):
         super().__init__()
+        self.y_cuda = y_cuda
         self.images_names = []
         self.labels = []
         self.transform = transform
@@ -79,7 +80,10 @@ class ImageDataset(Dataset):
         
         label = self.labels[index]
         if(self.cuda):
-            return torch.from_numpy(image).cuda(), label
+            if self.y_cuda:
+                return torch.from_numpy(image).cuda(), torch.tensor(int(label), dtype=torch.int64).cuda()
+            else:
+                return torch.from_numpy(image).cuda(), label
         else:
             return image, label
         

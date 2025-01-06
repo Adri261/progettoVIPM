@@ -120,4 +120,3 @@ def extract_features(train_set, test_set, network, layers_to_remove, cuda, augme
                                                                                 transfer_network=net,data_file=test_data_file, cuda=cuda, transform=transform)
     
     return net_features_train, numpy_feat_train, y_train, net_features_test, numpy_feat_test, y_test, fine_tune_layers
-    
