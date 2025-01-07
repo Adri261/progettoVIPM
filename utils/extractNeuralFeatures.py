@@ -28,7 +28,7 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
     else:
         print("Did not find an existing set of features in: {}".format(data_file))
         
-        dataset_holder = ImageDataset(dataset=dataset, network_input_size=input_size, cuda=cuda, transform=transform)
+        dataset_holder = ImageDataset(dataset=[dataset.value[0], dataset.value[1]], network_input_size=input_size, cuda=cuda, transform=transform)
         loader = DataLoader(dataset=dataset_holder, shuffle=False, batch_size=1)
         if(cuda):    
             net_features = torch.zeros(len(dataset_holder), in_features)

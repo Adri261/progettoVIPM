@@ -1,11 +1,14 @@
 import torch
 from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
 import cv2
 import numpy as np
 import csv
 from enum import Enum
 from torchvision import models
 import matplotlib.pyplot as plt
+from sklearn.model_selection import StratifiedKFold
+import os
 
 class datasets(Enum):
     TRAINING_LABELED = ["train_small.csv", "train_set"]
@@ -50,7 +53,6 @@ class ImageDataset(Dataset):
         self.labels = []
         self.transform = transform
         self.cuda = cuda
-        dataset = dataset.value
         annotations_file = dataset[0]
         img_dir = dataset[1]
         with open(annotations_file, newline='') as csvfile:
@@ -88,3 +90,33 @@ class ImageDataset(Dataset):
             return image, label
         
 
+def dataloader_stratified_kfold(dataset, k, network_input_size, batch_size, shuffle, cuda, transform=None, y_cuda = False):
+    loader_folds = []
+    dataset_file = np.loadtxt(dataset.value[0], delimiter=",", dtype="str")
+    skf = StratifiedKFold(n_splits=k)
+    for i, (train_index, val_index) in enumerate(skf.split(dataset_file[:,0], dataset_file[:,1])):
+        print(f"Fold {i}:")
+        if not os.path.exists("./stratified_kFolds"):
+            os.makedirs("./stratified_kFolds")
+        if not os.path.exists("./stratified_kFolds/{}_folds".format(k)):
+            os.makedirs("./stratified_kFolds/{}_folds".format(k))
+        
+
+        train_split = dataset_file[train_index]
+        filename = "./stratified_kFolds/{}_folds/{}_train.csv".format(k,i)
+        np.savetxt(filename, train_split,  delimiter = ",", fmt='%s')
+        train_dataset = ImageDataset(dataset=[filename, "./stratified_kFolds/{}_folds"], network_input_size=network_input_size, cuda=cuda,
+                                    transform=transform, y_cuda=y_cuda)
+        train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
+
+        val_split = dataset_file[val_index]
+        filename = "./stratified_kFolds/{}_folds/{}_val.csv".format(k,i)
+        np.savetxt(filename, val_split,  delimiter = ",", fmt='%s')
+        val_dataset = ImageDataset(dataset=[filename, "./stratified_kFolds/{}_folds"], network_input_size=network_input_size, cuda=cuda,
+                                    transform=transform, y_cuda=y_cuda)
+        val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=shuffle)
+
+        loader_folds.append([train_dataloader, val_dataloader])
+    
+    return loader_folds
+        

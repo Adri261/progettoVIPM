@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from utils.loadersAndEnums import ImageDataset
 import os
 import csv
 import numpy as np
