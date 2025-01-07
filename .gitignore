@@ -14,3 +14,5 @@ Transfer_Learning/models
 Transfer_Learning/models_bgr
 Transfer_Learning/neural_features
 Transfer_Learning/neural_features_bgr
+self-supervised/models
+self-supervised/model_metrics
