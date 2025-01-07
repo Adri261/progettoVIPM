@@ -78,10 +78,10 @@ class ImageDataset(Dataset):
             image = self.transform(image=image_rgb)["image"] #anche se l'input è (256, 256, 3), restutuisce in formato torch.Size([3, 256, 256]) o comunque (3, h, w) se la pipeline fa crop/altro
 
         
-        label = self.labels[index]
+        label = int(self.labels[index])
         if(self.cuda):
             if self.y_cuda:
-                return torch.from_numpy(image).cuda(), torch.tensor(int(label), dtype=torch.int64).cuda()
+                return torch.from_numpy(image).cuda(), torch.tensor(label, dtype=torch.int64).cuda()
             else:
                 return torch.from_numpy(image).cuda(), label
         else:

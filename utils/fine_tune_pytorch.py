@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from copy import deepcopy
+
 from utils.loadersAndEnums import ImageDataset
 import os
 import csv
@@ -10,13 +10,13 @@ from tqdm import tqdm
 from IPython.display import clear_output
 from sklearn.metrics import accuracy_score, confusion_matrix
 
-def fine_tune_network_layers(cuda, net_layers, x_train, y_train, n_epochs, batch_size, loss_function, optimizer):
+def fine_tune_network_layers(cuda, model, x_train, y_train, n_epochs, batch_size, loss_function, optimizer):
 
-    net_layers[-1].out_features = 251
+    model[-1].out_features = 251
     print("------------------Layers to fine-tune------------------")
-    print(net_layers[:])
+    print(model[:])
     print("-------------------------------------------------------")
-    model = deepcopy(net_layers)
+    
     if (cuda):
         model.cuda()
         y_train = torch.tensor(y_train).type(torch.LongTensor).cuda()
@@ -29,25 +29,21 @@ def fine_tune_network_layers(cuda, net_layers, x_train, y_train, n_epochs, batch
 
     training_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
     validation_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-
+    
     model,losses = train_model(training_loader, validation_loader, n_epochs, model, loss_function, optimizer)
-
+    
     return model, losses
 
 def train_model(training_loader, validation_loader, n_epochs, model, loss_function, optimizer):
-    epoch_number = 0
-
-
-    best_vloss = 1_000_000.
 
     losses = np.empty((n_epochs,2))
 
     for epoch in range(n_epochs):
         clear_output(wait=True)
-        print('EPOCH {}:'.format(epoch_number + 1))
+        print('EPOCH {}:'.format(epoch + 1))
 
         # Make sure gradient tracking is on, and do a pass over the data
-        model.train(True)
+        model.train()
         avg_loss = train_one_epoch(training_loader, model, loss_function, optimizer)
 
         running_vloss = 0.0
@@ -65,14 +61,13 @@ def train_model(training_loader, validation_loader, n_epochs, model, loss_functi
                 i += 1
 
         avg_vloss = running_vloss / i
-        losses[epoch_number] = [avg_loss, avg_vloss]
+        losses[epoch] = [avg_loss, avg_vloss]
         print('LOSS: train {}; valid {}'.format(avg_loss, avg_vloss))
 
-        epoch_number += 1
     return model, losses
 
 def train_one_epoch(training_loader, model, loss_function, optimizer):
-    model.train()
+    # print(model.training)
     n_batch = 1
     avg_batch_loss=0
     for data in training_loader:
@@ -86,8 +81,8 @@ def train_one_epoch(training_loader, model, loss_function, optimizer):
         # Forward pass
         outputs = model(inputs)
         loss = loss_function(outputs, labels)
+
         avg_batch_loss += loss.item()
-        
         # Backward pass and optimization
         loss.backward()
         optimizer.step()
@@ -111,16 +106,15 @@ def eval_model_on_test_loader(model, model_name, target_dir, test_loader, cuda):
 
     predictions = np.zeros(len(test_loader))
     # Disable gradient computation and reduce memory consumption.
-    y_test = []
+    y_test = np.zeros(len(test_loader))
     with torch.no_grad():
         i = 0
         for test_data in tqdm(test_loader):
             test_features, test_labels = test_data
-            y_test.append(test_labels)
+            y_test[i] = test_labels.cpu()
             predictions[i] = np.argmax(np.array(model(test_features).cpu()))
             i+=1
-    
-    y_test = np.array(y_test)
+
     accuracy = accuracy_score(y_test, predictions)
     print("Accuracy: {}".format(accuracy))
     cm = confusion_matrix(y_test, predictions)
