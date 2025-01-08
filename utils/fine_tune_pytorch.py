@@ -29,9 +29,9 @@ def fine_tune_network_layers(cuda, model, x_train, y_train, n_epochs, batch_size
     training_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
     validation_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     
-    model,losses = train_model(training_loader, validation_loader, n_epochs, model, loss_function, optimizer)
+    model, losses, accuracies = train_model(training_loader, validation_loader, n_epochs, model, loss_function, optimizer)
     
-    return model, losses
+    return model, losses, accuracies
 
 def train_model(training_loader, validation_loader, n_epochs, model, loss_function, optimizer):
 
@@ -76,7 +76,7 @@ def train_model(training_loader, validation_loader, n_epochs, model, loss_functi
         accuracies[epoch] = [epoch_accuracy, val_accuracy]
         print('LOSS: train {}; valid {}'.format(avg_loss, avg_vloss))
 
-    return model, losses
+    return model, losses, accuracies
 
 def train_one_epoch(training_loader, model, loss_function, optimizer):
     # print(model.training)
