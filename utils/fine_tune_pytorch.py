@@ -26,8 +26,8 @@ def fine_tune_network_layers(cuda, model, x_train, y_train, n_epochs, batch_size
     dataset_train = torch.utils.data.TensorDataset(x_train, y_train)
     train_dataset, val_dataset = torch.utils.data.random_split(dataset_train, [0.9, 0.1])
 
-    training_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
-    validation_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    training_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    validation_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
     
     model, losses, accuracies = train_model(training_loader, validation_loader, n_epochs, model, loss_function, optimizer)
     
