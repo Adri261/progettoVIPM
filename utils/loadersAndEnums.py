@@ -53,8 +53,12 @@ class ImageDataset(Dataset):
         self.labels = []
         self.transform = transform
         self.cuda = cuda
-        annotations_file = dataset.value[0]
-        img_dir = dataset.value[1]
+        if type(dataset) is list:
+            annotations_file = dataset[0]
+            img_dir = dataset[1]
+        else:
+            annotations_file = dataset.value[0]
+            img_dir = dataset.value[1]
         with open(annotations_file, newline='') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
