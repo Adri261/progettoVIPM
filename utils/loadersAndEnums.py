@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import csv
 from enum import Enum
-from torchvision import models
+from torchvision import models, transforms
 import matplotlib.pyplot as plt
 from sklearn.model_selection import StratifiedKFold
 import os
@@ -18,6 +18,8 @@ class datasets(Enum):
     VALIDATION_20 = ["validation_set_20%.csv", "train_set"]
     TEST = ["val_info.csv", "val_set"]
     TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]
+    TRAINING_LABELED_80 = ["training_set_80%.csv", "train_set"]
+    VALIDATION_LABELED_20 = ["validation_set_20%.csv", "train_set"]
     
 
 
@@ -48,13 +50,16 @@ class ImageDataset(Dataset):
         print(image_np)
         plt.axis('off') # Hide the axis plt.show()
 
-    def __init__(self, dataset, network_input_size, cuda, transform=None, y_cuda = False):
+    def __init__(self, dataset, network_input_size, cuda, transform=None, y_cuda = False, normalize = False):
         super().__init__()
         self.y_cuda = y_cuda
         self.images_names = []
         self.labels = []
         self.transform = transform
         self.cuda = cuda
+        self.normalize = normalize
+        self.mean = torch.tensor([0.6354, 0.5413, 0.4419])
+        self.std = torch.tensor([0.2760, 0.2900, 0.3161])
         if type(dataset) is list:
             annotations_file = dataset[0]
             img_dir = dataset[1]
@@ -82,6 +87,9 @@ class ImageDataset(Dataset):
         #moveaxis serve per avere come dimensione dell'immagine (3, righe, colonne) invece di (righe, colonne, 3)
         if self.transform is None:
             image = np.moveaxis(image_rgb, -1, 0)
+            if self.normalize == True:
+                transforms.Normalize(mean = self.mean, std = self.std)
+            
         else:  #apply the transformation pipe         
             image = self.transform(image=image_rgb)["image"] #anche se l'input è (256, 256, 3), restutuisce in formato torch.Size([3, 256, 256]) o comunque (3, h, w) se la pipeline fa crop/altro
 
