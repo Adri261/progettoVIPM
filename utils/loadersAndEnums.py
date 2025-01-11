@@ -88,8 +88,9 @@ class ImageDataset(Dataset):
         if self.transform is None:
             image = np.moveaxis(image_rgb, -1, 0)
             if self.normalize == True:
-                transforms.Normalize(mean = self.mean, std = self.std)
-            
+                nrm = transforms.Normalize(mean = self.mean, std = self.std)
+                image = nrm(torch.from_numpy(image))
+                image = image.numpy()            
         else:  #apply the transformation pipe         
             image = self.transform(image=image_rgb)["image"] #anche se l'input è (256, 256, 3), restutuisce in formato torch.Size([3, 256, 256]) o comunque (3, h, w) se la pipeline fa crop/altro
 
