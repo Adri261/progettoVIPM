@@ -133,7 +133,7 @@ def train_one_epoch(training_loader, model, loss_function, optimizer, k_for_accu
     print(f'Training Loss: {avg_loss}, Accuracy: {train_accuracy}%, {k}-Accuracy: {train_k_accuracy}%')
     return avg_loss, train_accuracy, train_k_accuracy
 
-def eval_model_on_test_set(model, model_name, target_dir, x_test, y_test, cuda):
+def eval_model_on_test_set(model, model_name, target_dir, x_test, y_test, cuda, k_for_accuracy =5):
     if (cuda):
         y_test = torch.tensor(y_test).type(torch.LongTensor).cuda()
     else:
@@ -141,7 +141,7 @@ def eval_model_on_test_set(model, model_name, target_dir, x_test, y_test, cuda):
         x_test = torch.from_numpy(x_test).float()
     
     test_loader = DataLoader(torch.utils.data.TensorDataset(x_test, y_test), batch_size=1, shuffle=False)
-    return eval_model_on_test_loader(model, model_name, target_dir, test_loader, cuda)
+    return eval_model_on_test_loader(model, model_name, target_dir, test_loader, cuda, k_for_accuracy= k_for_accuracy)
 
 def eval_model_on_test_loader(model, model_name, target_dir, test_loader, cuda, k_for_accuracy = 5):
     k = k_for_accuracy
@@ -160,8 +160,8 @@ def eval_model_on_test_loader(model, model_name, target_dir, test_loader, cuda, 
             _, predicted = torch.max(outputs, 1)
             predictions[i] = predicted.item()
             _, indexes = torch.sort(outputs, descending=True)
-            indexes = indexes[0:k]
-            if y_test[i] in indexes:
+            indexes = indexes[0,0:k]
+            if test_labels in indexes:
                 k_correct += 1
             i+=1
 

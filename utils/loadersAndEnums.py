@@ -14,6 +14,8 @@ class datasets(Enum):
     TRAINING_LABELED = ["train_small.csv", "train_set"]
     TRAINING_UNLABELED = ["train_unlabeled.csv", "train_set"]
     TRAINING_MIXED = ["train_mixed.csv", "train_set"]
+    TRAINING_80 = ["training_set_80%.csv", "train_set"]
+    VALIDATION_20 = ["validation_set_20%.csv", "train_set"]
     TEST = ["val_info.csv", "val_set"]
     TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]
     
@@ -109,14 +111,14 @@ def dataloader_stratified_kfold(dataset, k, network_input_size, batch_size, shuf
         train_split = dataset_file[train_index]
         filename = "./stratified_kFolds/{}_folds/{}_train.csv".format(k,i)
         np.savetxt(filename, train_split,  delimiter = ",", fmt='%s')
-        train_dataset = ImageDataset(dataset=[filename, "./stratified_kFolds/{}_folds"], network_input_size=network_input_size, cuda=cuda,
+        train_dataset = ImageDataset(dataset=[filename, "train_set"], network_input_size=network_input_size, cuda=cuda,
                                     transform=transform, y_cuda=y_cuda)
         train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
 
         val_split = dataset_file[val_index]
         filename = "./stratified_kFolds/{}_folds/{}_val.csv".format(k,i)
         np.savetxt(filename, val_split,  delimiter = ",", fmt='%s')
-        val_dataset = ImageDataset(dataset=[filename, "./stratified_kFolds/{}_folds"], network_input_size=network_input_size, cuda=cuda,
+        val_dataset = ImageDataset(dataset=[filename, "train_set"], network_input_size=network_input_size, cuda=cuda,
                                     transform=transform, y_cuda=y_cuda)
         val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=shuffle)
 
