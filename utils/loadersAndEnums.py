@@ -70,7 +70,7 @@ class ImageDataset(Dataset):
         self.im_size = network_input_size
     
     def __len__(self):
-        return len(self.labels)
+        return len(self.labels)    
     
     def __getitem__(self, index):
         image_bgr = cv2.resize((cv2.imread(self.images_names[index], cv2.IMREAD_COLOR).astype(np.double)/255), 
@@ -91,7 +91,7 @@ class ImageDataset(Dataset):
             else:
                 return torch.from_numpy(image).cuda(), label
         else:
-            return image, label
+            return image, label, self.images_names[index]
         
 
 def dataloader_stratified_kfold(dataset, k, network_input_size, batch_size, shuffle, cuda, transform=None, y_cuda = False):
