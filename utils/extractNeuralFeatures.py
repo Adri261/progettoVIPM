@@ -82,11 +82,15 @@ def extract_features(train_set, test_set, network, layers_to_remove, cuda, augme
     if not os.path.exists("./{}".format(target_dir)):
         os.makedirs(target_dir)
 
-    dataset_name = train_set.value[1]
-    if train_set.value[0] == "train_unlabeled.csv":
-        dataset_name = "train_unlabaled"
-    if train_set.value[0] == "train_mixed.csv":
-        dataset_name = "train_mixed"
+    dataset_name = train_set.value[0].split(".")[0]
+    # if train_set.value[0] == "train_unlabeled.csv":
+    #     dataset_name = "train_unlabaled"
+    # if train_set.value[0] == "train_mixed.csv":
+    #     dataset_name = "train_mixed"
+    # if train_set.value[0] == "train_set_80%.csv":
+    #     dataset_name = "train_set_80%"
+    # if train_set.value[0] == "validation_set_20%.csv":
+    #     dataset_name = "validation_set_20%"
 
     train_data_file = "./{}/Train_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, dataset_name)
     test_data_file = "./{}/Test_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, test_set.value[1])
@@ -119,4 +123,21 @@ def extract_features(train_set, test_set, network, layers_to_remove, cuda, augme
                                                                                 in_features = in_features,
                                                                                 transfer_network=net,data_file=test_data_file, cuda=cuda, transform=transform)
     
-    return net_features_train, numpy_feat_train, y_train, net_features_test, numpy_feat_test, y_test, fine_tune_layers
+    return net_features_train, numpy_feat_train, y_train, net_features_test, numpy_feat_test, y_test, fine_tune_layers, net
+
+
+def extract_features_from_dataloader(loader, out_features, transfer_network, dataset_type):
+    n_features = len(loader.dataset)
+    net_features = torch.zeros(n_features, out_features).cuda()
+    y = np.zeros(n_features).astype("int")
+    transfer_network.eval()
+    with torch.no_grad():
+        i = 0               
+        print("Extracting features:")
+        for X_batch, y_batch in tqdm(loader):
+            net_features[i]=transfer_network(X_batch)                           
+            if (dataset_type != "unlabled"):  
+                y[i] = y_batch[0]
+            i=i+1   
+    return net_features, y 
+    

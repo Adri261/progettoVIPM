@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import csv
 from enum import Enum
-from torchvision import models
+from torchvision import models, transforms
 import matplotlib.pyplot as plt
 from sklearn.model_selection import StratifiedKFold
 import os
@@ -14,8 +14,12 @@ class datasets(Enum):
     TRAINING_LABELED = ["train_small.csv", "train_set"]
     TRAINING_UNLABELED = ["train_unlabeled.csv", "train_set"]
     TRAINING_MIXED = ["train_mixed.csv", "train_set"]
+    TRAINING_80 = ["training_set_80%.csv", "train_set"]
+    VALIDATION_20 = ["validation_set_20%.csv", "train_set"]
     TEST = ["val_info.csv", "val_set"]
     TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]
+    TRAINING_LABELED_80 = ["training_set_80%.csv", "train_set"]
+    VALIDATION_LABELED_20 = ["validation_set_20%.csv", "train_set"]
     
 
 
@@ -46,13 +50,16 @@ class ImageDataset(Dataset):
         print(image_np)
         plt.axis('off') # Hide the axis plt.show()
 
-    def __init__(self, dataset, network_input_size, cuda, transform=None, y_cuda = False):
+    def __init__(self, dataset, network_input_size, cuda, transform=None, y_cuda = False, normalize = False):
         super().__init__()
         self.y_cuda = y_cuda
         self.images_names = []
         self.labels = []
         self.transform = transform
         self.cuda = cuda
+        self.normalize = normalize
+        self.mean = torch.tensor([0.6354, 0.5413, 0.4419])
+        self.std = torch.tensor([0.2760, 0.2900, 0.3161])
         if type(dataset) is list:
             annotations_file = dataset[0]
             img_dir = dataset[1]
@@ -80,6 +87,10 @@ class ImageDataset(Dataset):
         #moveaxis serve per avere come dimensione dell'immagine (3, righe, colonne) invece di (righe, colonne, 3)
         if self.transform is None:
             image = np.moveaxis(image_rgb, -1, 0)
+            if self.normalize == True:
+                nrm = transforms.Normalize(mean = self.mean, std = self.std)
+                image = nrm(torch.from_numpy(image))
+                image = image.numpy()            
         else:  #apply the transformation pipe         
             image = self.transform(image=image_rgb)["image"] #anche se l'input è (256, 256, 3), restutuisce in formato torch.Size([3, 256, 256]) o comunque (3, h, w) se la pipeline fa crop/altro
 
@@ -109,14 +120,14 @@ def dataloader_stratified_kfold(dataset, k, network_input_size, batch_size, shuf
         train_split = dataset_file[train_index]
         filename = "./stratified_kFolds/{}_folds/{}_train.csv".format(k,i)
         np.savetxt(filename, train_split,  delimiter = ",", fmt='%s')
-        train_dataset = ImageDataset(dataset=[filename, "./stratified_kFolds/{}_folds"], network_input_size=network_input_size, cuda=cuda,
+        train_dataset = ImageDataset(dataset=[filename, "train_set"], network_input_size=network_input_size, cuda=cuda,
                                     transform=transform, y_cuda=y_cuda)
         train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
 
         val_split = dataset_file[val_index]
         filename = "./stratified_kFolds/{}_folds/{}_val.csv".format(k,i)
         np.savetxt(filename, val_split,  delimiter = ",", fmt='%s')
-        val_dataset = ImageDataset(dataset=[filename, "./stratified_kFolds/{}_folds"], network_input_size=network_input_size, cuda=cuda,
+        val_dataset = ImageDataset(dataset=[filename, "train_set"], network_input_size=network_input_size, cuda=cuda,
                                     transform=transform, y_cuda=y_cuda)
         val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=shuffle)
 
