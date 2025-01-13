@@ -14,6 +14,7 @@ class datasets(Enum):
     TRAINING_LABELED = ["train_small.csv", "train_set"]
     TRAINING_UNLABELED = ["train_unlabeled.csv", "train_set"]
     TRAINING_MIXED = ["train_mixed.csv", "train_set"]
+    TRAINING_MOST_CONFIDENTLY_CLASSIFIED = ["train_cbl.csv", "train_set"]
     TEST = ["val_info.csv", "val_set"]
     TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]
     
@@ -91,7 +92,7 @@ class ImageDataset(Dataset):
             else:
                 return torch.from_numpy(image).cuda(), label
         else:
-            return image, label, self.images_names[index]
+            return image, label
         
 
 def dataloader_stratified_kfold(dataset, k, network_input_size, batch_size, shuffle, cuda, transform=None, y_cuda = False):
