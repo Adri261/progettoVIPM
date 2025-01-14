@@ -8,8 +8,11 @@ import csv
 import numpy as np
 from tqdm import tqdm
 
-def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, transfer_network, data_file, cuda=False):    
-    if(os.path.exists(data_file)):
+def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, transfer_network, data_file, cuda=False, transform=None):    
+    #if datafile is of mixed dataset it always must be re-computed because it could have changed
+    if(os.path.exists(data_file) and ("mixed" not in data_file)):
+        print("Found an existing set of features in: {}".format(data_file))
+        print("Loading features from file:")
         numpy_feat = np.load(data_file).astype("float32")
         if(cuda):            
             net_features = torch.from_numpy(numpy_feat).to(device="cuda")  
@@ -23,7 +26,9 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
                 y.append(row[1])
         y = np.array(y).astype("int")
     else:
-        dataset_holder = ImageDataset(dataset=dataset, network_input_size=input_size, cuda=cuda)
+        print("Did not find an existing set of features in: {}".format(data_file))
+        
+        dataset_holder = ImageDataset(dataset=[dataset.value[0], dataset.value[1]], network_input_size=input_size, cuda=cuda, transform=transform)
         loader = DataLoader(dataset=dataset_holder, shuffle=False, batch_size=1)
         if(cuda):    
             net_features = torch.zeros(len(dataset_holder), in_features)
@@ -31,7 +36,7 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
             transfer_network.eval()
             with torch.no_grad():
                 i = 0               
-                print("extracting features:")
+                print("Extracting features:")
                 for X_batch, y_batch in tqdm(loader):
                     net_features[i]=transfer_network(X_batch)                           
                     if (dataset_type != "unlabled"):  
@@ -41,7 +46,7 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
             #The following code copies the neural features to a numpy array stored in the cpu in order to use it in sklearn(non-neural) classifiers
             numpy_feat = np.zeros(net_features.shape)
             i = 0 
-            print("copying features:")
+            print("Copying features to cpu:")
             for i in tqdm(range(len(net_features))):
                 numpy_feat[i]= net_features[i].cpu().numpy()    
             np.save(data_file, numpy_feat)
@@ -54,7 +59,7 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
             transfer_network.eval()
             with torch.no_grad():
                 i = 0               
-                print("extracting features:")
+                print("Extracting features directly to cpu:")
                 for X_batch, y_batch in tqdm(loader):
                     numpy_feat[i]=transfer_network(X_batch)                           
                     if (dataset_type != "unlabled"):  
@@ -70,14 +75,25 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
     return net_features, numpy_feat, y
     
 
-def extract_features(train_set, test_set, network, layers_to_remove, cuda):
-    
-    dataset_name = train_set.value[1]
-    if train_set.value[0] == "train_unlabeled.csv":
-        dataset_name = "train_unlabaled"
+def extract_features(train_set, test_set, network, layers_to_remove, cuda, augmented=False, transform=None):
+    target_dir = "Storage/neural_features"
+    if augmented:
+        target_dir = "Storage/augmented_neural_features"
+    if not os.path.exists("./{}".format(target_dir)):
+        os.makedirs(target_dir)
 
-    train_data_file = "./Transfer_Learning/neural_features/Train_{}_minus{}_{}.npy".format(network.value[2], layers_to_remove, dataset_name)
-    test_data_file = "./Transfer_Learning/neural_features/Test_{}_minus{}_{}.npy".format(network.value[2], layers_to_remove, test_set.value[1])
+    dataset_name = train_set.value[0].split(".")[0]
+    # if train_set.value[0] == "train_unlabeled.csv":
+    #     dataset_name = "train_unlabaled"
+    # if train_set.value[0] == "train_mixed.csv":
+    #     dataset_name = "train_mixed"
+    # if train_set.value[0] == "train_set_80%.csv":
+    #     dataset_name = "train_set_80%"
+    # if train_set.value[0] == "validation_set_20%.csv":
+    #     dataset_name = "validation_set_20%"
+
+    train_data_file = "./{}/Train_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, dataset_name)
+    test_data_file = "./{}/Test_{}_minus{}_{}.npy".format(target_dir, network.value[2], layers_to_remove, test_set.value[1])
 
     errore = "There are less than {} layer in the given network's classifier".format(layers_to_remove)
     net_input_size = network.value[0]
@@ -100,12 +116,28 @@ def extract_features(train_set, test_set, network, layers_to_remove, cuda):
     net_features_train, numpy_feat_train, y_train = extract_features_of_dataset(dataset=train_set, dataset_type="Train",
                                                                                 input_size=net_input_size,
                                                                                 in_features = in_features,
-                                                                                transfer_network=net,data_file=train_data_file, cuda=cuda)
+                                                                                transfer_network=net,data_file=train_data_file, cuda=cuda, transform=transform)
     
     net_features_test, numpy_feat_test, y_test = extract_features_of_dataset(dataset=test_set, dataset_type="Test",
                                                                                 input_size=net_input_size,
                                                                                 in_features = in_features,
-                                                                                transfer_network=net,data_file=test_data_file, cuda=cuda)
+                                                                                transfer_network=net,data_file=test_data_file, cuda=cuda, transform=transform)
     
-    return net_features_train, numpy_feat_train, y_train, net_features_test, numpy_feat_test, y_test, fine_tune_layers
+    return net_features_train, numpy_feat_train, y_train, net_features_test, numpy_feat_test, y_test, fine_tune_layers, net
+
+
+def extract_features_from_dataloader(loader, out_features, transfer_network, dataset_type):
+    n_features = len(loader.dataset)
+    net_features = torch.zeros(n_features, out_features).cuda()
+    y = np.zeros(n_features).astype("int")
+    transfer_network.eval()
+    with torch.no_grad():
+        i = 0               
+        print("Extracting features:")
+        for X_batch, y_batch in tqdm(loader):
+            net_features[i]=transfer_network(X_batch)                           
+            if (dataset_type != "unlabled"):  
+                y[i] = y_batch[0]
+            i=i+1   
+    return net_features, y 
     

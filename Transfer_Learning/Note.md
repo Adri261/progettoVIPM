@@ -18,6 +18,7 @@ Accuracy rgb:
 - ultimi 2 strati: 13.873603468400866
 - ultimi 3 strati: 13.765215941303985 %
 
+Dopo aver allenato e testato varie cose mi occuperò di trasferire il codice su matlab eventualmente
 
 I prossimi risultati sono ottenuti da training con 50 epoche e batch size 128, dataset correttamente caricato con immagini RGB
 

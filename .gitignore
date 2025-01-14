@@ -1,6 +1,9 @@
 env
+utils/__pycache__
 runs
+Storage
 train_set.zip
+separated_training_set
 train_set
 separated_training_set
 val_set.zip
@@ -11,3 +14,5 @@ Transfer_Learning/models
 Transfer_Learning/models_bgr
 Transfer_Learning/neural_features
 Transfer_Learning/neural_features_bgr
+self-supervised/models
+self-supervised/model_metrics
