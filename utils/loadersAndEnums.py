@@ -18,6 +18,9 @@ class datasets(Enum):
     TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]
     TRAINING_LABELED_80 = ["training_set_80%.csv", "train_set"]
     VALIDATION_LABELED_20 = ["validation_set_20%.csv", "train_set"]
+    ASSIGNED_LABELS_10 = ["top_10_assigned_labels.csv", "train_set"]
+    ASSIGNED_LABELS_20 = ["top_20_assigned_labels.csv", "train_set"]
+    ASSIGNED_LABELS_50 = ["top_50_assigned_labels.csv", "train_set"]
     
 
 
