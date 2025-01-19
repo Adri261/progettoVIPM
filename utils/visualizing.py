@@ -23,7 +23,7 @@ def visualize_image(image_tensor):
     plt.show()
 
 
-def visualize_image_np_3xnxm(image): 
+def visualize_image_np_3xnxm(image, label=None): 
     image_nxnx3 = np.moveaxis(image, 0, -1)
     
     for i in range(3): # Assuming the last dimension is the channel dimension 
@@ -34,6 +34,9 @@ def visualize_image_np_3xnxm(image):
 
     image_nxnx3 = (image_nxnx3 * 255).astype('uint8')    
     plt.figure()
+    if label:
+        plt.suptitle(label)
+    plt.axis('off') # Hide the axis 
     plt.imshow(image_nxnx3)
 
 
