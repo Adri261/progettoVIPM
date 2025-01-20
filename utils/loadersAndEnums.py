@@ -14,6 +14,7 @@ class datasets(Enum):
     TRAINING_LABELED = ["train_small.csv", "train_set"]
     TRAINING_UNLABELED = ["train_unlabeled.csv", "train_set"]
     TRAINING_MIXED = ["train_mixed.csv", "train_set"]
+    TRAINING_MIXED_LABELSPREAD = ["train_mixed_labelspread.csv", "train_set"]
     TRAINING_80 = ["training_set_80%.csv", "train_set"]
     VALIDATION_20 = ["validation_set_20%.csv", "train_set"]
     TEST = ["val_info.csv", "val_set"]
@@ -28,6 +29,7 @@ class datasets(Enum):
 class networks(Enum):
     ALEXNET = [227, models.alexnet(pretrained=True), "AlexNet"]
     RESNET50 = [224, models.resnet50(pretrained=True), "ResNet50"]
+    FOODRESNET50 = [224, models.resnet50(pretrained=True), "FoodResNet50"]
     GOOGLENET = [224, models.googlenet(pretrained=True), "GoogLeNet"]
     MOBILENET = [224, models.mobilenet_v3_small(pretrained=True), "MobileNetV3_small"]
 
@@ -134,4 +136,85 @@ def dataloader_stratified_kfold(dataset, k, network_input_size, batch_size, shuf
         loader_folds.append([train_dataloader, val_dataloader])
     
     return loader_folds
+
+def separate_data_based_on_class_group(data,y_data):
+    i = 0
+
+    uova_pesce_frutti_di_mare_classes = [34,49,56,112,118,124,165,168,176,179,214,233,25,27,9,37,97,
+                                         99,152,3,36,45,50,65,67,91,117,154,189,191,195,197,200,212,216,218,248]
+    
+    pasta_riso_classes = [16,17,23,24,54,57,70,75,79,84,87,96,132,134,142,151,153,167,180,182,
+                          183,190,234,243,12,13,30,32,38,66,80,95,123,148,177,210]
+    
+    carne_pollo_classes = [18,20,22,28,41,42,47,71,74,77,83,85,92,93,103,104,114,122,126,
+                           128,131,140,143,145,157,158,159,163,166,171,187,206,208,213,215,217,222,
+                           228,230,231,240,241,242,249]
+    
+    torte_classes = [5,31,44,46,48,52,63,68,69,89,115,119,146,147,161,162,172,188,203,219,223,
+                     224,225,227,236,237,238,239]
+    
+    dolci_classes = [0,1,2,8,10,21,55,62,73,86,90,101,107,109,120,125,129,136,138,139,144,
+                     149,150,155,156,160,169,173,193,194,199,220,235]
+    
+    panini_tacos_classes = [4,6,7,14,26,29,33,43,51,81,100,102,106,127,137,164,174,184,185,198,201,
+                            202,205,207,221,229,232,244,246,247]
+    
+    altro_classes = [11,15,35,39,40,53,58,59,60,61,64,72,76,78,82,88,94,96,105,108,100,
+                     111,113,116,121,130,133,135,141,170,175,178,181,186,192,196,204,209,211,
+                     226,245,250]
+    
+    data_uova_pesce = [[],[]]
+    data_pasta_riso = [[],[]]
+    data_carne_pollo = [[],[]]
+    data_torte = [[],[]]
+    data_dolci = [[],[]]
+    data_panini = [[],[]]
+    data_altro = [[],[]]
+
+    for y in y_data:
+        if y in uova_pesce_frutti_di_mare_classes:
+            data_uova_pesce[0].append(data[i])
+            data_uova_pesce[1].append(y)
+        if y in pasta_riso_classes:
+            data_pasta_riso[0].append(data[i])
+            data_pasta_riso[1].append(y)
+        if y in carne_pollo_classes:
+            data_carne_pollo[0].append(data[i])
+            data_carne_pollo[1].append(y)
+        if y in torte_classes:
+            data_torte[0].append(data[i])
+            data_torte[1].append(y)
+        if y in dolci_classes:
+            data_dolci[0].append(data[i])
+            data_dolci[1].append(y)
+        if y in panini_tacos_classes:
+            data_panini[0].append(data[i])
+            data_panini[1].append(y)
+        if y in altro_classes:
+            data_altro[0].append(data[i])
+            data_altro[1].append(y)
         
+        i += 1
+    
+    data_uova_pesce[0] = np.array(data_uova_pesce[0])
+    data_uova_pesce[1] = np.array(data_uova_pesce[1])
+
+    data_pasta_riso[0] = np.array(data_pasta_riso[0])
+    data_pasta_riso[1] = np.array(data_pasta_riso[1])
+
+    data_carne_pollo[0] = np.array(data_carne_pollo[0])
+    data_carne_pollo[1] = np.array(data_carne_pollo[1])
+
+    data_torte[0] = np.array(data_torte[0])
+    data_torte[1] = np.array(data_torte[1])
+
+    data_dolci[0] = np.array(data_dolci[0])
+    data_dolci[1] = np.array(data_dolci[1])
+
+    data_panini[0] = np.array(data_panini[0])
+    data_panini[1] = np.array(data_panini[1])
+
+    data_altro[0] = np.array(data_altro[0])
+    data_altro[1] = np.array(data_altro[1])
+        
+    return data_uova_pesce,data_pasta_riso, data_carne_pollo, data_torte, data_dolci, data_panini,data_altro
