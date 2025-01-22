@@ -16,8 +16,10 @@ class datasets(Enum):
     TRAINING_MIXED = ["train_mixed.csv", "train_set"]
     TRAINING_MOST_CONFIDENTLY_CLASSIFIED = ["train_cbl.csv", "train_set"]
     TEST = ["val_info.csv", "val_set"]
-    TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]
+    TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]    
     
+    TRAINING_LABELED_80 = ["training_set_80%.csv", "train_set"]
+    VALIDATION_LABELED_20 = ["validation_set_20%.csv", "train_set"]
 
 
 #https://pytorch.org/hub/pytorch_vision_alexnet/
