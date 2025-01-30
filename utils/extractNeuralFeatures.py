@@ -8,7 +8,7 @@ import csv
 import numpy as np
 from tqdm import tqdm
 
-def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, transfer_network, data_file, cuda=False, transform=None):    
+def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, transfer_network, data_file, cuda=False, normalize = True, transform=None):    
     #if datafile is of mixed dataset it always must be re-computed because it could have changed
     if(os.path.exists(data_file)):
         print("Found an existing set of features in: {}".format(data_file))
@@ -28,7 +28,7 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
     else:
         print("Did not find an existing set of features in: {}".format(data_file))
         
-        dataset_holder = ImageDataset(dataset=[dataset.value[0], dataset.value[1]], network_input_size=input_size, cuda=cuda, transform=transform)
+        dataset_holder = ImageDataset(dataset=[dataset.value[0], dataset.value[1]], network_input_size=input_size, cuda=cuda, transform=transform, normalize=normalize)
         loader = DataLoader(dataset=dataset_holder, shuffle=False, batch_size=1)
         if(cuda):
             if(not(isinstance(in_features, tuple))):    
@@ -80,7 +80,9 @@ def extract_features_of_dataset(dataset, dataset_type, input_size, in_features, 
 
 def extract_features(train_set, test_set, network, layers_to_remove, cuda, augmented=False, transform=None, middle = False):
     target_dir = "Storage/neural_features"
+    normalize = True
     if augmented:
+        normalize = False
         target_dir = "Storage/augmented_neural_features"
     if not os.path.exists("./{}".format(target_dir)):
         os.makedirs(target_dir)
@@ -175,12 +177,15 @@ def extract_features(train_set, test_set, network, layers_to_remove, cuda, augme
     net_features_train, numpy_feat_train, y_train = extract_features_of_dataset(dataset=train_set, dataset_type="Train",
                                                                                 input_size=net_input_size,
                                                                                 in_features = in_features,
-                                                                                transfer_network=net,data_file=train_data_file, cuda=cuda, transform=transform)
+                                                                                transfer_network=net,data_file=train_data_file, cuda=cuda, transform=transform, normalize=normalize)
     
+    if "augmented" in test_set.value[1]:
+        print("Will not apply augmentation to given test set because it was already augmented")
+        transform = None
     net_features_test, numpy_feat_test, y_test = extract_features_of_dataset(dataset=test_set, dataset_type="Test",
                                                                                 input_size=net_input_size,
                                                                                 in_features = in_features,
-                                                                                transfer_network=net,data_file=test_data_file, cuda=cuda, transform=transform)
+                                                                                transfer_network=net,data_file=test_data_file, cuda=cuda, transform=transform, normalize=normalize)
     
     return net_features_train, numpy_feat_train, y_train, net_features_test, numpy_feat_test, y_test, fine_tune_layers, net
 

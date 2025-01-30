@@ -21,6 +21,7 @@ class datasets(Enum):
     TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]
     TRAINING_LABELED_80 = ["training_set_80%.csv", "train_set"]
     VALIDATION_LABELED_20 = ["validation_set_20%.csv", "train_set"]
+    VALIDATION_LABELED_20_DEGRADED = ["validation_set_20%.csv", "val_20_augmented_v2"]
     
 
 
@@ -52,7 +53,7 @@ class ImageDataset(Dataset):
         print(image_np)
         plt.axis('off') # Hide the axis plt.show()
 
-    def __init__(self, dataset, network_input_size, cuda, transform=None, y_cuda = False, normalize = False):
+    def __init__(self, dataset, network_input_size=None, cuda=False, transform=None, y_cuda = False, normalize = False):
         super().__init__()
         self.y_cuda = y_cuda
         self.images_names = []
@@ -82,20 +83,26 @@ class ImageDataset(Dataset):
         return len(self.labels)
     
     def __getitem__(self, index):
-        image_bgr = cv2.resize((cv2.imread(self.images_names[index], cv2.IMREAD_COLOR).astype(np.double)/255), 
-                                       (self.im_size,self.im_size), 
-                                        interpolation=cv2.INTER_CUBIC).astype(np.float32)
+        if self.im_size is None:
+            image_bgr = (cv2.imread(self.images_names[index], cv2.IMREAD_COLOR).astype(np.double)/255).astype(np.float32) 
+        else:
+            image_bgr = cv2.resize((cv2.imread(self.images_names[index], cv2.IMREAD_COLOR).astype(np.double)/255), 
+                                        (self.im_size,self.im_size), 
+                                            interpolation=cv2.INTER_CUBIC).astype(np.float32)
         image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
         #moveaxis serve per avere come dimensione dell'immagine (3, righe, colonne) invece di (righe, colonne, 3)
+        
         if self.transform is None:
             image = np.moveaxis(image_rgb, -1, 0)
             if self.normalize == True:
                 nrm = transforms.Normalize(mean = self.mean, std = self.std)
                 image = nrm(torch.from_numpy(image))
                 image = image.numpy()            
-        else:  #apply the transformation pipe         
-            image = self.transform(image=image_rgb)["image"] #anche se l'input è (256, 256, 3), restutuisce in formato torch.Size([3, 256, 256]) o comunque (3, h, w) se la pipeline fa crop/altro
-
+        else:  #apply the transformation pipe
+            image = np.moveaxis(image_rgb, -1, 0)         
+            image = torch.from_numpy(image)
+            image = self.transform(image) #anche se l'input è (256, 256, 3), restutuisce in formato torch.Size([3, 256, 256]) o comunque (3, h, w) se la pipeline fa crop/altro
+            image = image.numpy()
         
         label = int(self.labels[index])
         if(self.cuda):

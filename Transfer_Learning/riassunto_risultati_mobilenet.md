@@ -2,7 +2,13 @@
 
 ### Machine Learning
 
-
+Linear Support Vector obtained following accuracy: 0.099601593625498
+Rbf Support Vector obtained following accuracy: 0.1342231075697211
+KNN with 1 neighbors obtained following accuracy: 0.09063745019920319
+KNN with 10 neighbors obtained following accuracy: 0.10458167330677291
+KNN with 20 neighbors obtained following accuracy: 0.12151394422310757
+KNN with 50 neighbors obtained following accuracy: 0.12350597609561753
+Naive Bayes obtained following accuracy: 0.12848605577689243
 
 ### Finetune
 

@@ -10,9 +10,12 @@ val_set.zip
 val_set
 val_set_degraded.zip
 val_set_degraded
+val_20_augmented
+val_20_augmented_v2
 Transfer_Learning/models
 Transfer_Learning/models_bgr
 Transfer_Learning/neural_features
 Transfer_Learning/neural_features_bgr
 self-supervised/models
 self-supervised/model_metrics
+resnet50model.pth

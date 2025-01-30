@@ -19,7 +19,6 @@ def fine_tune_network_layers(cuda, model, x_train, y_train, n_epochs, batch_size
     if (cuda):
         model.cuda()
         y_train = torch.tensor(y_train).type(torch.LongTensor).cuda()
-        y_val =torch.tensor(y_val).type(torch.LongTensor).cuda()
     else:
         y_train = torch.tensor(y_train).type(torch.LongTensor)
         x_train = torch.from_numpy(x_train).float()
@@ -30,6 +29,7 @@ def fine_tune_network_layers(cuda, model, x_train, y_train, n_epochs, batch_size
         training_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         validation_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
     else:
+        y_val =torch.tensor(y_val).type(torch.LongTensor).cuda()
         dataset_train = torch.utils.data.TensorDataset(x_train, y_train)
         val_dataset = torch.utils.data.TensorDataset(x_val, y_val)
         training_loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True)
@@ -203,7 +203,9 @@ def eval_ensamble_on_test_loader(ensamble, ensamble_name, target_dir, test_loade
             whole_outputs = []
             for model in ensamble:
                 model.eval()
-                whole_outputs.append(model(test_features))
+                softmax = nn.Softmax(dim=1)
+                input = model(test_features)
+                whole_outputs.append(softmax(input))
             maxes = np.zeros(len(whole_outputs))
             argmaxes = np.zeros(len(whole_outputs)).astype(int)
             indexes = []
