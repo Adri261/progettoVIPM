@@ -19,3 +19,7 @@ Transfer_Learning/neural_features_bgr
 self-supervised/models
 self-supervised/model_metrics
 resnet50model.pth
+val_20_augmented
+val_20_augmented.zip
+val_20_augmented_v2.zip
+val_set_degraded.rar

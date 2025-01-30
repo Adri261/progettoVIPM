@@ -166,7 +166,7 @@ def eval_model_on_test_loader(model, model_name, target_dir, test_loader, cuda, 
             predictions[i] = predicted.item()
             _, indexes = torch.sort(outputs, descending=True)
             indexes = indexes[0,0:k]
-            if test_labels in indexes:
+            if y_test[i] in indexes:
                 k_correct += 1
             i+=1
 

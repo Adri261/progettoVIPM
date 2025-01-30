@@ -17,11 +17,13 @@ class datasets(Enum):
     TRAINING_MIXED_LABELSPREAD = ["train_mixed_labelspread.csv", "train_set"]
     TRAINING_80 = ["training_set_80%.csv", "train_set"]
     VALIDATION_20 = ["validation_set_20%.csv", "train_set"]
+    VALIDATION_20_DEGRADED = ["validation_set_20%.csv", "val_20_augmented"]
     TEST = ["val_info.csv", "val_set"]
     TEST_DEGRADED = ["val_info.csv", "val_set_degraded"]
     TRAINING_LABELED_80 = ["training_set_80%.csv", "train_set"]
     VALIDATION_LABELED_20 = ["validation_set_20%.csv", "train_set"]
-    VALIDATION_LABELED_20_DEGRADED = ["validation_set_20%.csv", "val_20_augmented_v2"]
+    VALIDATION_LABELED_20_DEGRADED_V2 = ["validation_set_20%.csv", "val_20_augmented_v2"]
+    VALIDATION_LABELED_20_DEGRADED = ["validation_set_20%.csv", "val_20_augmented"]
     
 
 
