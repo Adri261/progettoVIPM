@@ -18,3 +18,4 @@ Presentazione: [pdf](./slides.pdf)
 - Semi supervised: prove di Semi Supervised Learning
 - SSL-self supervised: prove di Self Supervised Learning
 
+Altre prove (come quelle di Content Based Image Retrieval) sono sulla rispettiva branch.
